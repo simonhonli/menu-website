@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全功能电子菜单系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 公共头部 */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0c0;
+            margin-bottom: 20px;
+        }
+        
+        /* 登录页面样式 */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
+        
+        .login-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .login-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #ff9a9e;
+            outline: none;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 154, 158, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-admin {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: auto;
+            padding: 10px 20px;
+            z-index: 1000;
+        }
+        
+        /* 主界面样式 */
+        .main-container {
+            display: none;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 20px;
+            text-align: center;
+            color: white;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+        }
+        
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 前台展示样式 */
+        .book-container {
+            width: 100%;
+            height: 700px;
+            perspective: 1500px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .book {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+        
+        .page {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            top: 0;
+            background-color: #fefefe;
+            overflow: hidden;
+            backface-visibility: hidden;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .page-left {
+            left: 0;
+            border-radius: 10px 0 0 10px;
+            transform-origin: right;
+        }
+        
+        .page-right {
+            right: 0;
+            border-radius: 0 10px 10px 0;
+            transform-origin: left;
+        }
+        
+        .page-content {
+            padding: 30px;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .page-front {
+            background: linear-gradient(to bottom, #f8f8f8, #ffffff);
+        }
+        
+        .page-back {
+            background: linear-gradient(to bottom, #ffffff, #f8f8f8);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .page-counter {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        /* 管理界面样式 */
+        .admin-section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #333;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff9a9e;
+        }
+        
+        .section-description {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        
+        .image-upload-container {
+            margin-bottom: 20px;
+        }
+        
+        .image-preview {
+            width: 200px;
+            height: 150px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .image-placeholder {
+            color: #999;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .menu-items-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .menu-item-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eee;
+            transition: all 0.3s;
+        }
+        
+        .menu-item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .menu-item-image {
+            width: 100%;
+            height: 180px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .menu-item-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        
+        .menu-item-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .menu-item-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+        
+        .menu-item-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        
+        .menu-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            width: auto;
+        }
+        
+        .btn-edit {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+        }
+        
+        .btn-delete {
+            background: linear-gradient(45deg, #f44336, #FF9800);
+        }
+        
+        .btn-add {
+            background: linear-gradient(45deg, #2196F3, #03A9F4);
+            margin-bottom: 20px;
+        }
+        
+        .categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .category-item {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-item i {
+            cursor: pointer;
+            color: #f44336;
+        }
+        
+        .restaurant-info-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .info-item label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-col {
+            flex: 1;
+        }
+        
+        /* 二维码分享样式 */
+        .qrcode-container {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+        
+        .qrcode-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .qrcode-image {
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .qrcode-instruction {
+            color: #666;
+            margin-top: 20px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .share-url {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            word-break: break-all;
+            font-family: monospace;
+            color: #333;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .book-container {
+                height: 600px;
+            }
+            
+            .menu-items-container {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .book-container {
+                height: 500px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .menu-items-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab {
+                min-width: 120px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .book-container {
+                height: 400px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            
+            .page-counter {
+                font-size: 1rem;
+            }
+            
+            .login-box {
+                padding: 20px;
+            }
+            
+            .tab {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 管理员登录按钮 (仅在前台显示) -->
+    <button class="btn btn-admin" id="adminBtn">
+        <i class="fas fa-user-cog"></i> 管理登录
+    </button>
+    
+    <!-- 登录界面 -->
+    <div class="container" id="loginContainer">
+        <div class="header">
+            <h1><i class="fas fa-book-open"></i> 全功能电子菜单系统</h1>
+            <p class="subtitle">作者登录后可以管理菜单内容，用户可直接浏览</p>
+        </div>
+        
+        <div class="login-container">
+            <div class="login-box">
+                <h2 class="login-title">作者登录</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="phone">手机号</label>
+                        <input type="tel" class="form-control" id="phone" placeholder="请输入手机号" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" class="form-control" id="password" placeholder="请输入密码" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn">登录管理系统</button>
+                    </div>
+                    <div class="form-group" style="text-align: center; color: #666; font-size: 0.9rem;">
+                        <p>提示：默认账号 15207575575 / 66669999</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主界面 (登录后显示) -->
+    <div class="container main-container" id="mainContainer">
+        <div class="header">
+            <h1 id="restaurantName">电子菜单系统</h1>
+            <p class="subtitle" id="restaurantSubtitle">作者管理后台</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="front">前台浏览</button>
+            <button class="tab" data-tab="basic">基本信息</button>
+            <button class="tab" data-tab="categories">菜单目录</button>
+            <button class="tab" data-tab="dishes">菜品管理</button>
+            <button class="tab" data-tab="share">二维码分享</button>
+        </div>
+        
+        <!-- 前台浏览 -->
+        <div class="tab-content active" id="frontTab">
+            <div class="book-container">
+                <div class="book" id="book">
+                    <!-- 页面将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="prevBtn">
+                    <i class="fas fa-arrow-left"></i> 上一页
+                </button>
+                
+                <div class="page-counter">
+                    <span id="currentPage">1</span> / <span id="totalPages">1</span>
+                </div>
+                
+                <button class="btn" id="nextBtn">
+                    下一页 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 基本信息管理 -->
+        <div class="tab-content" id="basicTab">
+            <div class="admin-section">
+                <h2 class="section-title">餐厅基本信息</h2>
+                <p class="section-description">设置餐厅的名称、描述、联系方式和图片</p>
+                
+                <div class="restaurant-info-container">
+                    <div class="info-item">
+                        <label for="restaurantNameInput">餐厅名称</label>
+                        <input type="text" class="form-control" id="restaurantNameInput" placeholder="请输入餐厅名称">
+                    </div>
+                    
+                    <div class="info-item">
+                        <label for="restaurantSubtitleInput">餐厅描述</label>
+                        <input type="text" class="form-control" id="restaurantSubtitleInput" placeholder="请输入餐厅描述">
+                    </div>
+                    
+                    <div class="info-item">
+                        <label for="restaurantPhoneInput">订餐电话</label>
+                        <input type="tel" class="form-control" id="restaurantPhoneInput" placeholder="请输入订餐电话">
+                    </div>
+                    
+                    <div class="info-item">
+                        <label for="restaurantAddressInput">餐厅地址</label>
+                        <input type="text" class="form-control" id="restaurantAddressInput" placeholder="请输入餐厅地址">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h2 class="section-title">LOGO图片</h2>
+                <p class="section-description">上传餐厅LOGO图片，建议尺寸：200x200px</p>
+                
+                <div class="image-upload-container">
+                    <div class="image-preview" id="logoPreview">
+                        <div class="image-placeholder">LOGO预览</div>
+                    </div>
+                    <input type="file" class="form-control" id="logoUpload" accept="image/*">
+                    <button class="btn btn-small" onclick="document.getElementById('logoUpload').click()">选择图片</button>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h2 class="section-title">主页图片</h2>
+                <p class="section-description">上传主页背景图片，建议尺寸：1200x600px</p>
+                
+                <div class="image-upload-container">
+                    <div class="image-preview" id="homeImagePreview">
+                        <div class="image-placeholder">主页图片预览</div>
+                    </div>
+                    <input type="file" class="form-control" id="homeImageUpload" accept="image/*">
+                    <button class="btn btn-small" onclick="document.getElementById('homeImageUpload').click()">选择图片</button>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <button class="btn" id="saveBasicInfoBtn">保存基本信息</button>
+            </div>
+        </div>
+        
+        <!-- 菜单目录管理 -->
+        <div class="tab-content" id="categoriesTab">
+            <div class="admin-section">
+                <h2 class="section-title">菜单目录管理</h2>
+                <p class="section-description">管理菜单的目录分类，至少需要23个分类</p>
+                
+                <div class="categories-container" id="categoriesList">
+                    <!-- 分类将通过JavaScript动态生成 -->
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" class="form-control" id="newCategoryInput" placeholder="输入新分类名称">
+                    <button class="btn btn-add" id="addCategoryBtn">添加新分类</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 菜品管理 -->
+        <div class="tab-content" id="dishesTab">
+            <div class="admin-section">
+                <h2 class="section-title">菜品管理</h2>
+                <p class="section-description">管理所有菜品，可以添加、编辑或删除菜品</p>
+                
+                <button class="btn btn-add" id="addDishBtn">添加新菜品</button>
+                
+                <div class="menu-items-container" id="dishesList">
+                    <!-- 菜品将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 二维码分享 -->
+        <div class="tab-content" id="shareTab">
+            <div class="qrcode-container">
+                <h2 class="qrcode-title">分享您的电子菜单</h2>
+                <p class="section-description">生成二维码后，顾客扫描即可查看电子菜单</p>
+                
+                <div id="qrcode" class="qrcode-image">
+                    <canvas id="qrcodeCanvas"></canvas>
+                </div>
+                
+                <div class="share-url" id="shareUrl">
+                    <!-- 分享链接将在这里显示 -->
+                </div>
+                
+                <div class="qrcode-instruction">
+                    <p><strong>使用说明：</strong></p>
+                    <p>1. 点击下方"生成二维码"按钮</p>
+                    <p>2. 将生成的二维码保存或打印</p>
+                    <p>3. 顾客使用手机扫描二维码即可查看菜单</p>
+                    <p>4. 每次更新菜单内容后，请重新生成二维码</p>
+                </div>
+                
+                <div class="admin-section" style="border-bottom: none; margin-top: 30px;">
+                    <button class="btn" id="generateQRBtn">生成二维码</button>
+                    <button class="btn btn-small" style="background: #4CAF50; margin-left: 15px;" id="downloadQRBtn">下载二维码</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 菜品编辑模态框 -->
+    <div class="modal" id="dishModal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="dishModalTitle">添加新菜品</h2>
+            
+            <form id="dishForm">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="dishName">菜品名称</label>
+                            <input type="text" class="form-control" id="dishName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="dishPrice">价格 (元)</label>
+                            <input type="number" class="form-control" id="dishPrice" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dishDescription">菜品描述</label>
+                    <textarea class="form-control" id="dishDescription" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dishCategory">所属分类</label>
+                    <select class="form-control" id="dishCategory" required>
+                        <!-- 分类将通过JavaScript动态生成 -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>菜品图片</label>
+                    <div class="image-upload-container">
+                        <div class="image-preview" id="dishImagePreview">
+                            <div class="image-placeholder">菜品图片预览</div>
+                        </div>
+                        <input type="file" class="form-control" id="dishImageUpload" accept="image/*">
+                        <button type="button" class="btn btn-small" onclick="document.getElementById('dishImageUpload').click()">选择图片</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn" id="saveDishBtn">保存菜品</button>
+                    <button type="button" class="btn btn-small" style="background: #ccc; margin-left: 10px;" id="cancelDishBtn">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 退出登录按钮 (仅在管理界面显示) -->
+    <button class="btn btn-admin" id="logoutBtn" style="display: none;">
+        <i class="fas fa-sign-out-alt"></i> 退出登录
+    </button>
+
+    <script>
+        // 系统数据
+        const SYSTEM = {
+            // 作者登录信息
+            author: {
+                phone: "15207575575",
+                password: "66669999"
+            },
+            
+            // 默认数据
+            defaultData: {
+                restaurant: {
+                    name: "美食餐厅",
+                    subtitle: "品味生活，从美食开始",
+                    phone: "400-123-4567",
+                    address: "美食街888号",
+                    logo: "",
+                    homeImage: ""
+                },
+                
+                // 默认分类 (至少23个)
+                categories: [
+                    "特色推荐", "开胃前菜", "汤品", "沙拉", 
+                    "主菜", "海鲜", "肉类", "禽类", 
+                    "蔬菜", "米饭面食", "披萨", "意大利面", 
+                    "汉堡三明治", "日式料理", "韩式料理", "泰式料理", 
+                    "中式热菜", "中式凉菜", "火锅", "烧烤", 
+                    "甜品", "饮料", "酒水", "儿童餐", "套餐"
+                ],
+                
+                // 默认菜品
+                dishes: [
+                    {
+                        id: 1,
+                        name: "蒜香烤面包",
+                        price: 28,
+                        description: "新鲜法棍切片，涂抹特制蒜香黄油，烤至金黄酥脆",
+                        category: "开胃前菜",
+                        image: ""
+                    },
+                    {
+                        id: 2,
+                        name: "安格斯牛排",
+                        price: 168,
+                        description: "精选安格斯牛里脊，搭配黑椒汁和时令蔬菜",
+                        category: "主菜",
+                        image: ""
+                    },
+                    {
+                        id: 3,
+                        name: "香煎三文鱼",
+                        price: 128,
+                        description: "挪威三文鱼，搭配柠檬黄油酱和烤芦笋",
+                        category: "海鲜",
+                        image: ""
+                    },
+                    {
+                        id: 4,
+                        name: "提拉米苏",
+                        price: 38,
+                        description: "经典意大利甜品，咖啡与马斯卡彭的完美结合",
+                        category: "甜品",
+                        image: ""
+                    },
+                    {
+                        id: 5,
+                        name: "凯撒沙拉",
+                        price: 38,
+                        description: "新鲜罗马生菜搭配帕玛森奶酪、烤面包丁和凯撒酱",
+                        category: "沙拉",
+                        image: ""
+                    },
+                    {
+                        id: 6,
+                        name: "法式洋葱汤",
+                        price: 32,
+                        description: "慢炖洋葱汤，搭配融化奶酪和烤面包片",
+                        category: "汤品",
+                        image: ""
+                    },
+                    {
+                        id: 7,
+                        name: "意大利肉酱面",
+                        price: 58,
+                        description: "手工宽面，搭配慢炖牛肉酱和帕玛森奶酪",
+                        category: "意大利面",
+                        image: ""
+                    },
+                    {
+                        id: 8,
+                        name: "香草烤鸡",
+                        price: 78,
+                        description: "用迷迭香、百里香腌制，慢火烤制，外酥里嫩",
+                        category: "禽类",
+                        image: ""
+                    },
+                    {
+                        id: 9,
+                        name: "海鲜拼盘",
+                        price: 198,
+                        description: "包含龙虾、扇贝、大虾和青口贝，搭配特制酱汁",
+                        category: "海鲜",
+                        image: ""
+                    },
+                    {
+                        id: 10,
+                        name: "巧克力熔岩蛋糕",
+                        price: 42,
+                        description: "温热巧克力蛋糕搭配香草冰淇淋，口感丰富",
+                        category: "甜品",
+                        image: ""
+                    }
+                ]
+            },
+            
+            // 当前数据
+            data: null,
+            
+            // 当前状态
+            currentPage: 1,
+            totalPages: 1,
+            itemsPerPage: 6,
+            currentCategory: "all",
+            isAnimating: false,
+            editingDishId: null,
+            qrCodeGenerated: false
+        };
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initData();
+            setupEventListeners();
+            
+            // 检查是否已登录
+            if (localStorage.getItem('menuAdminLoggedIn') === 'true') {
+                showMainInterface();
+            } else {
+                showLoginInterface();
+            }
+            
+            // 检查URL参数
+            checkUrlParams();
+        });
+        
+        // 初始化数据
+        function initData() {
+            // 尝试从localStorage加载数据
+            const savedData = localStorage.getItem('menuData');
+            
+            if (savedData) {
+                SYSTEM.data = JSON.parse(savedData);
+            } else {
+                // 使用默认数据
+                SYSTEM.data = JSON.parse(JSON.stringify(SYSTEM.defaultData));
+                saveData();
+            }
+            
+            // 计算总页数
+            updateTotalPages();
+        }
+        
+        // 保存数据到localStorage
+        function saveData() {
+            localStorage.setItem('menuData', JSON.stringify(SYSTEM.data));
+            updateTotalPages();
+        }
+        
+        // 更新总页数
+        function updateTotalPages() {
+            const totalItems = SYSTEM.data.dishes.length;
+            SYSTEM.totalPages = Math.ceil(totalItems / SYSTEM.itemsPerPage) || 1;
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 登录表单提交
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const phone = document.getElementById('phone').value;
+                const password = document.getElementById('password').value;
+                
+                if (phone === SYSTEM.author.phone && password === SYSTEM.author.password) {
+                    localStorage.setItem('menuAdminLoggedIn', 'true');
+                    showMainInterface();
+                } else {
+                    alert('手机号或密码错误！');
+                }
+            });
+            
+            // 管理员按钮点击
+            document.getElementById('adminBtn').addEventListener('click', function() {
+                showLoginInterface();
+            });
+            
+            // 退出登录按钮
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('menuAdminLoggedIn');
+                showLoginInterface();
+            });
+            
+            // 标签切换
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // 更新活动标签
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 显示对应内容
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tabId + 'Tab').classList.add('active');
+                    
+                    // 如果是前台标签，重新渲染页面
+                    if (tabId === 'front') {
+                        initBook();
+                        renderPage(1);
+                    }
+                    
+                    // 如果是分享标签，生成二维码
+                    if (tabId === 'share' && !SYSTEM.qrCodeGenerated) {
+                        generateQRCode();
+                    }
+                });
+            });
+            
+            // 保存基本信息
+            document.getElementById('saveBasicInfoBtn').addEventListener('click', saveBasicInfo);
+            
+            // 添加分类
+            document.getElementById('addCategoryBtn').addEventListener('click', addCategory);
+            
+            // 添加菜品
+            document.getElementById('addDishBtn').addEventListener('click', function() {
+                showDishModal();
+            });
+            
+            // 菜品表单提交
+            document.getElementById('dishForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveDish();
+            });
+            
+            // 取消菜品编辑
+            document.getElementById('cancelDishBtn').addEventListener('click', function() {
+                document.getElementById('dishModal').classList.remove('active');
+            });
+            
+            // 图片上传处理
+            setupImageUploads();
+            
+            // 翻页控制
+            document.getElementById('prevBtn').addEventListener('click', function() {
+                if (SYSTEM.currentPage > 1 && !SYSTEM.isAnimating) {
+                    goToPage(SYSTEM.currentPage - 1);
+                }
+            });
+            
+            document.getElementById('nextBtn').addEventListener('click', function() {
+                if (SYSTEM.currentPage < SYSTEM.totalPages && !SYSTEM.isAnimating) {
+                    goToPage(SYSTEM.currentPage + 1);
+                }
+            });
+            
+            // 生成二维码按钮
+            document.getElementById('generateQRBtn').addEventListener('click', generateQRCode);
+            
+            // 下载二维码按钮
+            document.getElementById('downloadQRBtn').addEventListener('click', downloadQRCode);
+            
+            // 键盘支持
+            document.addEventListener('keydown', function(e) {
+                if (SYSTEM.isAnimating) return;
+                
+                if (e.key === 'ArrowLeft' && SYSTEM.currentPage > 1) {
+                    goToPage(SYSTEM.currentPage - 1);
+                } else if (e.key === 'ArrowRight' && SYSTEM.currentPage < SYSTEM.totalPages) {
+                    goToPage(SYSTEM.currentPage + 1);
+                }
+            });
+        }
+        
+        // 显示登录界面
+        function showLoginInterface() {
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('adminBtn').style.display = 'block';
+            document.getElementById('logoutBtn').style.display = 'none';
+        }
+        
+        // 显示主界面
+        function showMainInterface() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('adminBtn').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'block';
+            
+            // 加载数据到管理界面
+            loadBasicInfo();
+            loadCategories();
+            loadDishes();
+            
+            // 初始化前台展示
+            initBook();
+            renderPage(1);
+        }
+        
+        // 加载基本信息到表单
+        function loadBasicInfo() {
+            const restaurant = SYSTEM.data.restaurant;
+            
+            // 更新页面标题
+            document.getElementById('restaurantName').textContent = restaurant.name;
+            document.getElementById('restaurantSubtitle').textContent = restaurant.subtitle;
+            
+            // 填充表单
+            document.getElementById('restaurantNameInput').value = restaurant.name;
+            document.getElementById('restaurantSubtitleInput').value = restaurant.subtitle;
+            document.getElementById('restaurantPhoneInput').value = restaurant.phone;
+            document.getElementById('restaurantAddressInput').value = restaurant.address;
+            
+            // 预览图片
+            if (restaurant.logo) {
+                document.getElementById('logoPreview').innerHTML = `<img src="${restaurant.logo}" alt="LOGO">`;
+            }
+            
+            if (restaurant.homeImage) {
+                document.getElementById('homeImagePreview').innerHTML = `<img src="${restaurant.homeImage}" alt="主页图片">`;
+            }
+        }
+        
+        // 保存基本信息
+        function saveBasicInfo() {
+            SYSTEM.data.restaurant.name = document.getElementById('restaurantNameInput').value;
+            SYSTEM.data.restaurant.subtitle = document.getElementById('restaurantSubtitleInput').value;
+            SYSTEM.data.restaurant.phone = document.getElementById('restaurantPhoneInput').value;
+            SYSTEM.data.restaurant.address = document.getElementById('restaurantAddressInput').value;
+            
+            // 更新页面标题
+            document.getElementById('restaurantName').textContent = SYSTEM.data.restaurant.name;
+            document.getElementById('restaurantSubtitle').textContent = SYSTEM.data.restaurant.subtitle;
+            
+            saveData();
+            alert('基本信息已保存！');
+        }
+        
+        // 加载分类
+        function loadCategories() {
+            const categoriesList = document.getElementById('categoriesList');
+            categoriesList.innerHTML = '';
+            
+            SYSTEM.data.categories.forEach((category, index) => {
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'category-item';
+                categoryItem.innerHTML = `
+                    <span>${category}</span>
+                    <i class="fas fa-times" onclick="deleteCategory(${index})"></i>
+                `;
+                categoriesList.appendChild(categoryItem);
+            });
+        }
+        
+        // 添加分类
+        function addCategory() {
+            const input = document.getElementById('newCategoryInput');
+            const categoryName = input.value.trim();
+            
+            if (categoryName) {
+                SYSTEM.data.categories.push(categoryName);
+                saveData();
+                loadCategories();
+                input.value = '';
+            } else {
+                alert('请输入分类名称！');
+            }
+        }
+        
+        // 删除分类
+        function deleteCategory(index) {
+            if (confirm('确定要删除这个分类吗？')) {
+                SYSTEM.data.categories.splice(index, 1);
+                saveData();
+                loadCategories();
+            }
+        }
+        
+        // 加载菜品
+        function loadDishes() {
+            const dishesList = document.getElementById('dishesList');
+            dishesList.innerHTML = '';
+            
+            SYSTEM.data.dishes.forEach(dish => {
+                const dishCard = document.createElement('div');
+                dishCard.className = 'menu-item-card';
+                dishCard.innerHTML = `
+                    <div class="menu-item-image">
+                        ${dish.image ? `<img src="${dish.image}" alt="${dish.name}">` : '<div class="image-placeholder">暂无图片</div>'}
+                    </div>
+                    <div class="menu-item-name">${dish.name}</div>
+                    <div class="menu-item-price">¥${dish.price}</div>
+                    <div class="menu-item-description">${dish.description}</div>
+                    <div class="menu-item-actions">
+                        <button class="btn btn-small btn-edit" onclick="editDish(${dish.id})">编辑</button>
+                        <button class="btn btn-small btn-delete" onclick="deleteDish(${dish.id})">删除</button>
+                    </div>
+                `;
+                dishesList.appendChild(dishCard);
+            });
+        }
+        
+        // 显示菜品编辑模态框
+        function showDishModal(dishId = null) {
+            const modal = document.getElementById('dishModal');
+            const form = document.getElementById('dishForm');
+            const title = document.getElementById('dishModalTitle');
+            
+            // 重置表单
+            form.reset();
+            document.getElementById('dishImagePreview').innerHTML = '<div class="image-placeholder">菜品图片预览</div>';
+            
+            // 填充分类下拉框
+            const categorySelect = document.getElementById('dishCategory');
+            categorySelect.innerHTML = '';
+            
+            SYSTEM.data.categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+            
+            if (dishId) {
+                // 编辑模式
+                title.textContent = '编辑菜品';
+                SYSTEM.editingDishId = dishId;
+                
+                const dish = SYSTEM.data.dishes.find(d => d.id === dishId);
+                if (dish) {
+                    document.getElementById('dishName').value = dish.name;
+                    document.getElementById('dishPrice').value = dish.price;
+                    document.getElementById('dishDescription').value = dish.description;
+                    document.getElementById('dishCategory').value = dish.category;
+                    
+                    if (dish.image) {
+                        document.getElementById('dishImagePreview').innerHTML = `<img src="${dish.image}" alt="${dish.name}">`;
+                    }
+                }
+            } else {
+                // 添加模式
+                title.textContent = '添加新菜品';
+                SYSTEM.editingDishId = null;
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        // 保存菜品
+        function saveDish() {
+            const name = document.getElementById('dishName').value;
+            const price = parseFloat(document.getElementById('dishPrice').value);
+            const description = document.getElementById('dishDescription').value;
+            const category = document.getElementById('dishCategory').value;
+            
+            // 获取图片数据
+            const imageInput = document.getElementById('dishImageUpload');
+            const imagePreview = document.getElementById('dishImagePreview');
+            let imageData = '';
+            
+            if (imagePreview.querySelector('img')) {
+                imageData = imagePreview.querySelector('img').src;
+            }
+            
+            if (SYSTEM.editingDishId) {
+                // 更新现有菜品
+                const dishIndex = SYSTEM.data.dishes.findIndex(d => d.id === SYSTEM.editingDishId);
+                if (dishIndex !== -1) {
+                    SYSTEM.data.dishes[dishIndex] = {
+                        ...SYSTEM.data.dishes[dishIndex],
+                        name,
+                        price,
+                        description,
+                        category,
+                        image: imageData
+                    };
+                }
+            } else {
+                // 添加新菜品
+                const newId = SYSTEM.data.dishes.length > 0 
+                    ? Math.max(...SYSTEM.data.dishes.map(d => d.id)) + 1 
+                    : 1;
+                
+                SYSTEM.data.dishes.push({
+                    id: newId,
+                    name,
+                    price,
+                    description,
+                    category,
+                    image: imageData
+                });
+            }
+            
+            saveData();
+            loadDishes();
+            document.getElementById('dishModal').classList.remove('active');
+            
+            // 如果在前台浏览，重新渲染
+            if (document.getElementById('frontTab').classList.contains('active')) {
+                initBook();
+                renderPage(SYSTEM.currentPage);
+            }
+            
+            alert('菜品已保存！');
+        }
+        
+        // 编辑菜品
+        function editDish(dishId) {
+            showDishModal(dishId);
+        }
+        
+        // 删除菜品
+        function deleteDish(dishId) {
+            if (confirm('确定要删除这个菜品吗？')) {
+                SYSTEM.data.dishes = SYSTEM.data.dishes.filter(d => d.id !== dishId);
+                saveData();
+                loadDishes();
+                
+                // 如果在前台浏览，重新渲染
+                if (document.getElementById('frontTab').classList.contains('active')) {
+                    initBook();
+                    renderPage(SYSTEM.currentPage);
+                }
+                
+                alert('菜品已删除！');
+            }
+        }
+        
+        // 设置图片上传
+        function setupImageUploads() {
+            // LOGO上传
+            document.getElementById('logoUpload').addEventListener('change', function(e) {
+                handleImageUpload(e, 'logoPreview', 'restaurant', 'logo');
+            });
+            
+            // 主页图片上传
+            document.getElementById('homeImageUpload').addEventListener('change', function(e) {
+                handleImageUpload(e, 'homeImagePreview', 'restaurant', 'homeImage');
+            });
+            
+            // 菜品图片上传
+            document.getElementById('dishImageUpload').addEventListener('change', function(e) {
+                handleImageUpload(e, 'dishImagePreview');
+            });
+        }
+        
+        // 处理图片上传
+        function handleImageUpload(event, previewId, dataType = null, dataField = null) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                
+                const preview = document.getElementById(previewId);
+                preview.innerHTML = '';
+                preview.appendChild(img);
+                
+                // 如果指定了数据类型和字段，保存到数据中
+                if (dataType && dataField) {
+                    if (dataType === 'restaurant') {
+                        SYSTEM.data.restaurant[dataField] = e.target.result;
+                        saveData();
+                    }
+                }
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // 简单的二维码生成函数
+        function generateQRCode() {
+            // 清除旧的二维码
+            document.getElementById('qrcode').innerHTML = '<canvas id="qrcodeCanvas"></canvas>';
+            
+            // 生成当前页面的URL作为分享链接
+            const currentUrl = window.location.href.split('?')[0]; // 移除可能存在的查询参数
+            
+            // 创建一个简单的分享链接，使用当前页面URL
+            const shareUrl = currentUrl + '#menu-shared';
+            
+            // 显示分享链接
+            document.getElementById('shareUrl').textContent = shareUrl;
+            
+            // 使用简单的Canvas绘制二维码
+            drawQRCode(shareUrl);
+            
+            SYSTEM.qrCodeGenerated = true;
+            alert('二维码生成成功！顾客扫描此二维码即可查看您的电子菜单。');
+        }
+        
+        // 简单的Canvas绘制二维码函数
+        function drawQRCode(text) {
+            const canvas = document.getElementById('qrcodeCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 设置画布大小
+            canvas.width = 250;
+            canvas.height = 250;
+            
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制白色背景
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 简单的二维码模拟（实际应用中应该使用二维码库）
+            // 这里我们使用一个简单的模式来模拟二维码
+            ctx.fillStyle = 'black';
+            
+            // 绘制定位标记
+            drawPositionMarker(ctx, 20, 20);
+            drawPositionMarker(ctx, 20, canvas.height - 50);
+            drawPositionMarker(ctx, canvas.width - 50, 20);
+            
+            // 生成简单的数据图案
+            const data = generateQRData(text);
+            drawQRData(ctx, data);
+            
+            // 添加文字提示
+            ctx.fillStyle = 'black';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('扫描查看菜单', canvas.width / 2, canvas.height - 10);
+        }
+        
+        // 绘制定位标记
+        function drawPositionMarker(ctx, x, y) {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(x, y, 30, 30);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x + 5, y + 5, 20, 20);
+            ctx.fillStyle = 'black';
+            ctx.fillRect(x + 10, y + 10, 10, 10);
+        }
+        
+        // 生成简单的QR数据（模拟）
+        function generateQRData(text) {
+            // 这是一个简化的数据生成，实际应该使用QR算法
+            const data = [];
+            for (let i = 0; i < 15; i++) {
+                data[i] = [];
+                for (let j = 0; j < 15; j++) {
+                    // 基于文本内容生成伪随机黑白点
+                    const charCode = text.charCodeAt((i * 15 + j) % text.length) || 0;
+                    data[i][j] = (charCode + i + j) % 2 === 0;
+                }
+            }
+            return data;
+        }
+        
+        // 绘制QR数据
+        function drawQRData(ctx, data) {
+            const cellSize = 8;
+            const startX = 60;
+            const startY = 60;
+            
+            for (let i = 0; i < data.length; i++) {
+                for (let j = 0; j < data[i].length; j++) {
+                    ctx.fillStyle = data[i][j] ? 'black' : 'white';
+                    ctx.fillRect(startX + j * cellSize, startY + i * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+        
+        // 下载二维码
+        function downloadQRCode() {
+            const canvas = document.getElementById('qrcodeCanvas');
+            if (!canvas) {
+                alert('请先生成二维码！');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = '电子菜单二维码.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // 检查URL参数
+        function checkUrlParams() {
+            // 检查是否有分享标记
+            if (window.location.hash === '#menu-shared') {
+                // 隐藏管理按钮
+                document.getElementById('adminBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'none';
+                
+                // 加载数据
+                initData();
+                
+                // 初始化前台展示
+                initBook();
+                renderPage(1);
+                
+                // 显示前台界面
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                
+                // 隐藏标签栏
+                document.querySelector('.tabs').style.display = 'none';
+                
+                // 只显示前台内容
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById('frontTab').classList.add('active');
+                
+                // 更新页面标题
+                document.getElementById('restaurantName').textContent = SYSTEM.data.restaurant.name;
+                document.getElementById('restaurantSubtitle').textContent = SYSTEM.data.restaurant.subtitle;
+            }
+        }
+        
+        // 前台展示部分
+        // 初始化书籍页面
+        function initBook() {
+            const book = document.getElementById('book');
+            book.innerHTML = '';
+            book.style.transform = 'rotateY(0deg)';
+            
+            // 计算总页数
+            updateTotalPages();
+            
+            // 创建页面
+            for (let i = 1; i <= SYSTEM.totalPages; i++) {
+                const pageLeft = document.createElement('div');
+                pageLeft.className = `page page-left page-front ${i % 2 === 0 ? 'even' : 'odd'}`;
+                pageLeft.id = `page-left-${i}`;
+                
+                const pageRight = document.createElement('div');
+                pageRight.className = `page page-right page-back ${i % 2 === 0 ? 'even' : 'odd'}`;
+                pageRight.id = `page-right-${i}`;
+                
+                const contentLeft = document.createElement('div');
+                contentLeft.className = 'page-content';
+                
+                const contentRight = document.createElement('div');
+                contentRight.className = 'page-content';
+                
+                pageLeft.appendChild(contentLeft);
+                pageRight.appendChild(contentRight);
+                
+                // 定位页面
+                if (i === 1) {
+                    pageLeft.style.zIndex = SYSTEM.totalPages;
+                    pageRight.style.zIndex = SYSTEM.totalPages - 1;
+                } else {
+                    pageLeft.style.zIndex = SYSTEM.totalPages - (i - 1) * 2;
+                    pageRight.style.zIndex = SYSTEM.totalPages - (i - 1) * 2 - 1;
+                    
+                    // 初始位置：偶数页在左侧，奇数页在右侧
+                    if (i % 2 === 0) {
+                        pageLeft.style.transform = 'rotateY(-180deg)';
+                    }
+                }
+                
+                book.appendChild(pageLeft);
+                book.appendChild(pageRight);
+            }
+            
+            // 更新页面计数器
+            document.getElementById('currentPage').textContent = SYSTEM.currentPage;
+            document.getElementById('totalPages').textContent = SYSTEM.totalPages;
+        }
+        
+        // 渲染指定页面
+        function renderPage(pageNum) {
+            SYSTEM.currentPage = pageNum;
+            document.getElementById('currentPage').textContent = pageNum;
+            document.getElementById('totalPages').textContent = SYSTEM.totalPages;
+            
+            // 获取当前页应该显示的菜品
+            const startIdx = (pageNum - 1) * SYSTEM.itemsPerPage;
+            const endIdx = startIdx + SYSTEM.itemsPerPage;
+            const pageItems = SYSTEM.data.dishes.slice(startIdx, endIdx);
+            
+            // 确定是左侧页面还是右侧页面
+            const pageContainer = document.getElementById(`page-${pageNum % 2 === 0 ? 'right' : 'left'}-${pageNum}`);
+            if (!pageContainer) return;
+            
+            const contentDiv = pageContainer.querySelector('.page-content');
+            
+            // 构建页面内容
+            const restaurant = SYSTEM.data.restaurant;
+            let html = '';
+            
+            if (pageNum === 1) {
+                // 第一页显示餐厅信息
+                html = `
+                    <div style="text-align: center; padding: 40px 0;">
+                        ${restaurant.logo ? `<img src="${restaurant.logo}" alt="LOGO" style="max-width: 150px; margin-bottom: 20px;">` : ''}
+                        <h2 style="font-size: 2.5rem; color: #333; margin-bottom: 15px;">${restaurant.name}</h2>
+                        <p style="font-size: 1.2rem; color: #666; margin-bottom: 30px;">${restaurant.subtitle}</p>
+                        <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                            <p><i class="fas fa-phone"></i> 订餐电话: ${restaurant.phone}</p>
+                            <p><i class="fas fa-map-marker-alt"></i> 地址: ${restaurant.address}</p>
+                        </div>
+                        ${restaurant.homeImage ? `<img src="${restaurant.homeImage}" alt="餐厅图片" style="width: 100%; border-radius: 10px; margin-bottom: 20px;">` : ''}
+                        <h3 style="color: #333; margin-bottom: 20px;">今日推荐</h3>
+                    </div>
+                `;
+                
+                // 添加前几个菜品
+                const featuredItems = SYSTEM.data.dishes.slice(0, Math.min(3, SYSTEM.data.dishes.length));
+                featuredItems.forEach(item => {
+                    html += createDishHTML(item);
+                });
+            } else {
+                // 普通页面显示菜品
+                if (pageItems.length === 0) {
+                    html = `<p style="text-align: center; margin-top: 50px; color: #888;">暂无菜品</p>`;
+                } else {
+                    pageItems.forEach(item => {
+                        html += createDishHTML(item);
+                    });
+                }
+            }
+            
+            // 添加页码信息
+            html += `<p style="text-align: center; margin-top: 30px; color: #888; font-size: 0.9rem;">第 ${pageNum} 页</p>`;
+            
+            contentDiv.innerHTML = html;
+            
+            // 更新按钮状态
+            document.getElementById('prevBtn').disabled = SYSTEM.currentPage <= 1;
+            document.getElementById('nextBtn').disabled = SYSTEM.currentPage >= SYSTEM.totalPages;
+        }
+        
+        // 创建菜品HTML
+        function createDishHTML(dish) {
+            return `
+                <div class="menu-item" style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px dashed #e0e0e0;">
+                    <div style="display: flex; gap: 20px;">
+                        <div style="flex: 0 0 120px;">
+                            ${dish.image ? `<img src="${dish.image}" alt="${dish.name}" style="width: 100%; border-radius: 8px;">` : 
+                            '<div style="width: 120px; height: 100px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">无图</div>'}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="font-size: 1.3rem; font-weight: 700; color: #333;">${dish.name}</div>
+                                <div style="font-size: 1.3rem; font-weight: 700; color: #ff6b6b;">¥${dish.price}</div>
+                            </div>
+                            <div style="color: #666; margin-bottom: 10px; line-height: 1.5;">${dish.description}</div>
+                            <div style="background: #f0f0f0; display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; color: #555;">${dish.category}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 转到指定页面
+        function goToPage(pageNum) {
+            if (SYSTEM.isAnimating) return;
+            
+            SYSTEM.isAnimating = true;
+            const book = document.getElementById('book');
+            
+            // 计算翻转角度
+            const isForward = pageNum > SYSTEM.currentPage;
+            const direction = isForward ? -180 : 180;
+            
+            // 应用翻转动画
+            book.style.transform = `rotateY(${direction}deg)`;
+            
+            // 动画完成后更新页面内容
+            setTimeout(() => {
+                // 重置书籍位置
+                book.style.transition = 'none';
+                book.style.transform = 'rotateY(0deg)';
+                
+                // 重新排列页面z-index
+                rearrangePages(pageNum, isForward);
+                
+                // 强制重排以应用样式变化
+                void book.offsetWidth;
+                
+                // 恢复过渡效果
+                book.style.transition = 'transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1)';
+                
+                // 渲染新页面
+                renderPage(pageNum);
+                
+                SYSTEM.isAnimating = false;
+            }, 600);
+        }
+        
+        // 重新排列页面z-index
+        function rearrangePages(newPage, isForward) {
+            const allPages = document.querySelectorAll('.page');
+            
+            allPages.forEach(page => {
+                const pageNum = parseInt(page.id.split('-').pop());
+                
+                if (pageNum === newPage) {
+                    page.style.zIndex = SYSTEM.totalPages;
+                } else if (pageNum === newPage + 1 || pageNum === newPage - 1) {
+                    page.style.zIndex = SYSTEM.totalPages - 1;
+                } else {
+                    page.style.zIndex = Math.max(1, SYSTEM.totalPages - Math.abs(pageNum - newPage));
+                }
+            });
+        }
+    </script>
+</body>
+</html>
